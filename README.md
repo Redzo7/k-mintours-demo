@@ -50,7 +50,21 @@ Python 3.13 builds of each.*
 
 ## Project structure
 
-TODO
+```
+drone-cover/
+├── environment.yml
+├── README.md
+├── src/drone_cover/
+│   ├── geometry.py      # reachability, f/g maximal-tour functions
+│   ├── dominance.py     # dominated-depot removal, depot ordering
+│   ├── equilibrium.py   # equilibrium points between depots
+│   ├── greedy.py        # 1-depot greedy algorithm (Bereg et al.)
+│   ├── kmintours.py     # recursive k-depot algorithm
+│   ├── generator.py     # random instance generation
+│   └── demo.py          # step-by-step visualisation
+├── notebooks/
+└── tests/
+```
 
 ## References
  

@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}   # needed so conda activate works
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.yml
+          activate-environment: drone-cover
+          miniforge-version: latest
+
+      - name: Install package
+        run: pip install -e . --no-deps
+
+      - name: Lint
+        run: |
+          ruff check .
+
+      - name: Test
+        run: pytest -q

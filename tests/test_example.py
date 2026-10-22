@@ -1,2 +1,5 @@
+def examp(a,b):
+    return a+b
+
 def test_example():
-    assert 5 == 5
+    assert examp(2, 3) == 5

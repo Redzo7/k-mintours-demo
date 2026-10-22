@@ -32,7 +32,7 @@ jupyter lab                 # notebooks
 ## Layout
 
 ```
-src/drone_cover/
+drone_cover/
   geometry.py     # reachability, Ml/Mr (Prop. 6), f and g (Props. 3–4)
   dominance.py    # dominated-depot removal, sorting by x (Prop. 8, Cor. 9)
   equilibrium.py  # equilibrium points between depots (Def. 11, Prop. 12)

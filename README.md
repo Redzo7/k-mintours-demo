@@ -48,13 +48,19 @@ Python 3.13 builds of each.*
    python -c "import numpy, scipy, matplotlib, pandas; print('OK')"
 ```
 
+5. **Run the visual demo**
+
+```bash
+    python -m drone_cover.demo
+```
+
 ## Project structure
 
 ```
 drone-cover/
 ├── environment.yml
 ├── README.md
-├── src/drone_cover/
+├── drone_cover/
 │   ├── geometry.py      # reachability, f/g maximal-tour functions
 │   ├── dominance.py     # dominated-depot removal, depot ordering
 │   ├── equilibrium.py   # equilibrium points between depots

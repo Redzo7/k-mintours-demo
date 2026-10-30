@@ -31,15 +31,6 @@ class Instance:
     L: float
 
 @dataclass(frozen=True)
-class Solution:
-    tours: tuple[Tour, ...]
-    trace: tuple[StepTrace, ...]    # StepTrace as in the other thread
-
-    @property
-    def m(self) -> int:
-        return len(self.tours)
-
-@dataclass(frozen=True)
 class StepTrace:
     step: int
     current_depot: int                    # D1 of this step
@@ -51,3 +42,12 @@ class StepTrace:
     tours: tuple[Tour, ...]               # tours added from current depot
     m: float                              # cut point M
     remaining: tuple[Segment, ...]        # sub-instance passed on
+
+@dataclass(frozen=True)
+class Solution:
+    tours: tuple[Tour, ...]
+    trace: tuple[StepTrace, ...]    # StepTrace as in the other thread
+
+    @property
+    def m(self) -> int:
+        return len(self.tours)

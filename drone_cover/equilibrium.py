@@ -1,10 +1,12 @@
+from scipy.optimize import brentq
+
 from .geometry import f, reachable_interval
 from .models import Depot
 
 
 # Find the equilibrium point between two ordered depots
 # Returns None if the reachable areas do not overlap
-def equilibrium_point(di: Depot, dj: Depot, L: float, max_iter: int = 200) -> float | None:
+def equilibrium_point(di: Depot, dj: Depot, L: float) -> float | None:
     ivi = reachable_interval(di, L)
     ivj = reachable_interval(dj, L)
     if ivi is None or ivj is None:
@@ -17,17 +19,16 @@ def equilibrium_point(di: Depot, dj: Depot, L: float, max_iter: int = 200) -> fl
     if mlj >= mri:                       # reachable areas do not intersect
         return None
 
+    def diff(x: float) -> float:
+        return f(di, x, L) - f(dj, x, L)
+
     lo = mlj
     hi = mri
-    for _ in range(max_iter):
-        mid = (lo + hi) / 2
-        if mid <= lo or mid >= hi:       # floating-point resolution reached
-            break
-        if f(di, mid, L) - f(dj, mid, L) > 0:
-            lo = mid
-        else:
-            hi = mid
-    return (lo + hi) / 2
+    if diff(lo) <= 0:
+        return lo
+    if diff(hi) >= 0:
+        return hi
+    return brentq(diff, lo, hi, xtol=1e-12)
 
 
 # Compute the equilibrium points between the current depot and later depot whose reach overlaps the current one

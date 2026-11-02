@@ -1,19 +1,36 @@
-from .geometry import f
-from .models import Depot, Instance, Segment, Tour
+"""Greedy algorithm of Bereg et al. for one depot (Thm. 7)."""
+
+from .geometry import f, validate_instance
+from .models import EPS, Depot, Instance, Segment, Tour
 
 
-# Greedily cover `segments` (sorted, disjoint, non-empty) from one depot
-# Returns (tours, cut point M, remaining segments to the right of M)
 def greedy_cover(
     depot: Depot,
     segments: tuple[Segment, ...],
     L: float,
     stop_at: float | None = None,
 ) -> tuple[tuple[Tour, ...], float, tuple[Segment, ...]]:
+    """Greedily cover sorted, disjoint `segments` with right maximal tours.
+
+    Thm. 7: from the leftmost uncovered point take the right maximal tour; if
+    its right endpoint falls in a gap, shrink it to the end of the last segment
+    it touches and restart at the next segment's left endpoint.
+
+    With `stop_at` (the equilibrium point P of Section 4) the greedy stops as
+    soon as the next tour would start at or right of P, i.e. once the last
+    tour's right endpoint has passed P, or the next segment begins after P.
+
+    A segment whose right end lies within EPS of a tour's right endpoint counts
+    as covered by that tour, so float rounding never adds a sliver tour.
+
+    Returns (tours, cut point M, remaining segments right of M). The caller
+    must ensure every point to cover is strictly reachable from `depot`
+    (`geometry.validate_feasible`); otherwise a ValueError is raised.
+    """
     segs = list(segments)
     n = len(segs)
     if n == 0:
-        return (), 0, ()
+        return (), 0.0, ()
 
     tours: list[Tour] = []
     i = 0
@@ -21,19 +38,19 @@ def greedy_cover(
 
     while i < n and (stop_at is None or s < stop_at):
         step = f(depot, s, L)
-        if step <= 1e-12:
-            raise ValueError(f"point x={s} is not strictly reachable from depot {depot.id}")
+        if step <= 0.0:
+            raise ValueError(f"x={s} is not strictly reachable from depot {depot.id}")
         b = s + step
 
-        while i < n and segs[i].xr <= b:         # segments fully covered
+        while i < n and segs[i].xr <= b + EPS:  # segments fully covered
             i += 1
 
         start = s
-        if i < n and segs[i].xl <= b:            # b lies inside segment i
+        if i < n and segs[i].xl <= b:  # b lies inside segment i
             end = b
-            s = b                                # next tour starts here (consecutive)
-        else:                                    # b in a gap or past the last segment
-            end = segs[i - 1].xr                 # shorten the tour
+            s = b  # next tour starts here (consecutive)
+        else:  # b in a gap or past the last segment
+            end = segs[i - 1].xr  # shorten the tour (or snap within EPS)
             if i < n:
                 s = segs[i].xl
         tours.append(Tour(depot, start, end))
@@ -41,7 +58,7 @@ def greedy_cover(
     if i >= n:
         remaining: list[Segment] = []
     elif s > segs[i].xl:
-        remaining = [Segment(s, segs[i].xr)] + segs[i + 1:]
+        remaining = [Segment(s, segs[i].xr)] + segs[i + 1 :]
     else:
         remaining = segs[i:]
 
@@ -49,9 +66,10 @@ def greedy_cover(
     return tuple(tours), cut, tuple(remaining)
 
 
-# Optimal solution of 1-MinTours
 def solve_1_mintours(instance: Instance) -> tuple[Tour, ...]:
+    """Optimal solution of 1-MinTours (Thm. 7)."""
     if len(instance.depots) != 1:
         raise ValueError("1-MinTours expects exactly one depot")
+    validate_instance(instance)
     tours, _, _ = greedy_cover(instance.depots[0], instance.segments, instance.L)
     return tours

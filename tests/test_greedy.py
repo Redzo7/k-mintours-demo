@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 from drone_cover.geometry import f, reachable_interval
-from drone_cover.greedy import greedy_cover, solve_1_mintours
-from drone_cover.models import Depot, Instance, Segment
+from drone_cover.greedy import greedy_cover, greedy_cover_traced, solve_1_mintours
+from drone_cover.models import EPS, Depot, Instance, Segment
 
 L = 10.0
 AXIS = Depot(0, 0.0, 0.0)  # on the axis: every maximal tour ends at x = 5 or covers 5
@@ -68,3 +68,36 @@ def test_one_mintours_near_boundary_terminates():
 def test_one_mintours_wants_one_depot():
     with pytest.raises(ValueError):
         solve_1_mintours(Instance((Segment(0.0, 1.0),), (AXIS, Depot(1, 1, 0)), L))
+
+
+def test_trace_matches_tours():
+    segs = (Segment(-4.0, -2.0), Segment(2.0, 3.0))
+    tours, cut, remaining, steps = greedy_cover_traced(AXIS, segs, L)
+    assert (tours, cut, remaining) == greedy_cover(AXIS, segs, L)
+    assert len(steps) == len(tours)
+    first, second = steps
+    assert first.shrunk and first.raw_end == pytest.approx(1.0)
+    assert first.end == -2.0 and first.next_start == 2.0
+    assert second.next_start is None and not second.stopped_by_p
+
+
+def test_trace_marks_stop_rule():
+    *_, steps = greedy_cover_traced(AXIS, (Segment(-4.5, 4.5),), L, stop_at=0.0)
+    assert len(steps) == 1
+    assert steps[0].stopped_by_p and not steps[0].shrunk
+    assert steps[0].next_start == pytest.approx(0.5)
+
+
+def test_trace_consistent_on_random_instances():
+    rng = np.random.default_rng(11)
+    d = Depot(0, 0.0, 2.0)
+    ml, mr = reachable_interval(d, L)
+    for _ in range(200):
+        pts = np.sort(rng.uniform(ml + 0.01, mr - 0.01, size=8))
+        segs = tuple(Segment(float(a), float(b)) for a, b in pts.reshape(-1, 2))
+        tours, _, _, steps = greedy_cover_traced(d, segs, L)
+        for t, g in zip(tours, steps, strict=True):
+            assert (g.start, g.end) == (t.a, t.b)
+            assert g.reach == f(d, g.start, L)
+            assert g.raw_end == g.start + g.reach
+            assert g.shrunk == (g.end < g.raw_end - EPS)

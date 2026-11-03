@@ -3,7 +3,7 @@
 from .dominance import prune_dominated_and_order_depots
 from .equilibrium import equilibrium_points, leftmost_equilibrium
 from .geometry import reachable_interval, validate_instance
-from .greedy import greedy_cover
+from .greedy import greedy_cover_traced
 from .models import Instance, Solution, StepTrace, Tour
 
 
@@ -53,7 +53,9 @@ def solve_k_mintours(instance: Instance) -> Solution:
                 stop_at = iv[1]
         # else: base case (step 2), stop_at stays None and the greedy finishes
 
-        new_tours, cut, remaining = greedy_cover(current, segments, L, stop_at)
+        new_tours, cut, remaining, steps = greedy_cover_traced(
+            current, segments, L, stop_at
+        )
 
         trace.append(
             StepTrace(
@@ -68,6 +70,7 @@ def solve_k_mintours(instance: Instance) -> Solution:
                 tours=new_tours,
                 m=cut,
                 remaining=remaining,
+                greedy_steps=steps,
             )
         )
         all_tours.extend(new_tours)

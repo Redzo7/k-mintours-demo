@@ -91,6 +91,19 @@ class Instance:
 
 
 @dataclass(frozen=True)
+class GreedyStep:
+    """One tour of the greedy of Bereg et al. (Thm. 7), for visualisation."""
+
+    start: float  # s: leftmost uncovered point, left end of the tour
+    reach: float  # f(D, s), Prop. 3
+    raw_end: float  # s + f(D, s): right end of the right maximal tour
+    end: float  # right end actually used (shortened if raw_end is in a gap)
+    shrunk: bool  # raw_end fell in a gap / past the last segment
+    next_start: float | None  # where the next tour would start (None: done)
+    stopped_by_p: bool  # the stop rule (Section 4, step 4) fired after this
+
+
+@dataclass(frozen=True)
 class StepTrace:
     """One recursion step of k-MinTours (Section 4), for visualisation."""
 
@@ -105,6 +118,7 @@ class StepTrace:
     tours: tuple[Tour, ...]  # tours added from current depot
     m: float  # cut point M
     remaining: tuple[Segment, ...]  # sub-instance passed on
+    greedy_steps: tuple[GreedyStep, ...] = ()  # one per tour, same order
 
 
 @dataclass(frozen=True)

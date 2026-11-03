@@ -51,8 +51,17 @@ Python 3.13 builds of each.*
 5. **Run the visual demo**
 
 ```bash
-    python -m drone_cover.demo
+    python -m drone_cover.demo                       # "showcase" example
+    python -m drone_cover.demo --list                # list the examples
+    python -m drone_cover.demo --example gap         # a specific example
+    python -m drone_cover.demo --random --seed 1 --k 4 --m 6   # seeded random instance
 ```
+
+The window steps through the algorithm one frame at a time (Next/Prev buttons,
+arrow keys, Home/End): the instance and reachable intervals, removal of dominated
+depots, the equilibrium points of each recursion step, every greedy tour (with
+f(D, s) and the tour length), the cut point M, and the final result. The caption
+under the plot explains each step and cites the paper item it uses.
 
 ## Project structure
 
@@ -66,6 +75,7 @@ drone-cover/
 │   ├── equilibrium.py   # equilibrium points between depots
 │   ├── greedy.py        # 1-depot greedy algorithm (Bereg et al.)
 │   ├── kmintours.py     # recursive k-depot algorithm
+│   ├── examples.py      # hand-crafted demo instances
 │   ├── generator.py     # random instance generation
 │   └── demo.py          # step-by-step visualisation
 ├── notebooks/

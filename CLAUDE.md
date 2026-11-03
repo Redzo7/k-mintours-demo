@@ -38,6 +38,7 @@ drone_cover/
   equilibrium.py  # equilibrium points between depots (Def. 11, Prop. 12)
   greedy.py       # 1-depot greedy algorithm of Bereg et al. (Thm. 7)
   kmintours.py    # recursive k-depot algorithm (Section 4)
+  examples.py     # hand-crafted instances, one per algorithm case
   generator.py    # random instance generation for experiments
   demo.py         # step-by-step matplotlib visualisation
 notebooks/        # interactive demos, statistical analysis
